@@ -1,0 +1,45 @@
+service: hash-service
+
+frameworkVersion: '3'
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-offline
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: ${file(../serverless-config.json):region}
+  stage: ${opt:stage, 'dev'}
+  timeout: 5
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1 # https://go.aws/3InkVao
+    REGION: ${self:provider.region}
+
+  httpApi:
+    id: !ImportValue NearGatewayHttpApiId
+  iam:
+    role:
+      statements: []
+
+custom:
+  startup-service:
+# TODO: uncomment this section when https://github.com/nearcomponents/gateway/pull/14 is merged
+#    filesBucket:
+#      name: !ImportValue near-gateway-FileServiceFilesBucketName
+#      arn: !ImportValue near-gateway-FileServiceFilesBucketArn
+
+### TODO: Package each file into a separate zip file
+#package:
+#  individually: true
+#  excludeDevDependencies: true
+#  patterns:
+#    - '!**/*'
+
+functions:
+  - ${file(./lambda/createHash/config.yml)}
+  - ${file(./lambda/verifyHash/config.yml)}
+
+
+resources:
+  - Description: Hashing Service API stack
+

@@ -1,0 +1,22 @@
+createHash:
+  handler: lambda/createHash/index.handler
+  description: "Allows user to create a hash from an input"
+  events:
+    - httpApi:
+        path: /hashes
+        method: post
+## TODO: fix Error: Serverless Offline only supports retrieving JWT from the headers
+#        authorizer:
+#          type: jwt
+#          id: !ImportValue NearGatewayAuthorizerId
+  environment:
+    TABLE_NAME_HASHES: near-hashes
+  iamRoleStatementsInherit: true
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:UpdateItem
+      Resource:
+        ## TODO: use ${ssm:/dynamodb/hash-service/hashes/arn} when exported by Terraform
+        - arn:aws:dynamodb:${aws:region}:${aws:accountId}:table/near-hashes
+

@@ -1,0 +1,15 @@
+{
+  "name": "create-hash",
+  "version": "1.0.0",
+  "description": "Allows user to create a hash from an input",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fprint": "^2.0.1",
+    "uuid": "^8.3.2"
+  }
+}

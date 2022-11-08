@@ -1,0 +1,81 @@
+service: app-service
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  stage: dev
+  runtime: nodejs14.x
+  region: ${file(../serverless-config.json):region}
+  httpApi:
+    id: !ImportValue NearGatewayHttpApiId
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - dynamodb:BatchGet*
+            - dynamodb:DescribeStream
+            - dynamodb:DescribeTable
+            - dynamodb:Get*
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:BatchWrite*
+            - dynamodb:CreateTable
+            - dynamodb:Delete*
+            - dynamodb:Update*
+            - dynamodb:PutItem
+          Resource: "arn:aws:dynamodb:*:*:*"
+
+functions:
+  apps-list:
+    handler: list.main
+    events:
+     - httpApi:
+          path: /apps
+          method: get
+          authorizer:            
+            type: request
+            id: !ImportValue NearGatewayAuthorizerId
+  apps-get:
+    handler: get.main
+    events:
+     - httpApi:
+        path: /apps/{appId}
+        method: get
+        authorizer:            
+          type: request
+          id: !ImportValue NearGatewayAuthorizerId
+
+# serverless-offline:
+#     noPrependStageInUrl: true
+#     noAuth: true
+
+# plugins:
+#   - serverless-offline
+#   - serverless-dynamodb-local
+
+# custom:
+#  dynamodb:
+#      stages: 
+#         - dev
+#      start: 
+#         port: 8000
+#         inMemory: false
+#         migrate: true
+
+# #uncomment for testing 
+# resources: # CloudFormation template syntax from here on.
+#   Resources:
+#     usersTable:
+#       Type: AWS::DynamoDB::Table
+#       Properties:
+#         TableName: near-apps
+#         AttributeDefinitions:
+#           - AttributeName: appId
+#             AttributeType: S
+#         KeySchema:
+#           - AttributeName: appId
+#             KeyType: HASH
+#         ProvisionedThroughput:
+#           ReadCapacityUnits: 1
+#           WriteCapacityUnits: 1

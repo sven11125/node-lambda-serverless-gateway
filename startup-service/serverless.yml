@@ -1,0 +1,77 @@
+service: near-gateway
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  stage: dev
+  runtime: nodejs14.x
+  region: ${file(../serverless-config.json):region}
+  apiGateway:
+    apiKeys:
+      - defaultKey
+  httpApi:
+    cors: true
+
+functions:  
+  token-authorizer:
+      handler: authorizer.handler
+
+  get-status-service:
+    handler: index.handler
+    events:
+     - httpApi:
+         path: /
+         method: get
+
+resources:
+  Resources:
+    NearGatewayAuthorizer:
+      Type: AWS::ApiGatewayV2::Authorizer
+      Properties:
+        Name: NearGatewayAuthorizer
+        ApiId: !Ref HttpApi          
+        AuthorizerType: REQUEST
+        AuthorizerPayloadFormatVersion: "2.0"
+        EnableSimpleResponses: true
+        IdentitySource:
+          - $request.header.Authorization
+        AuthorizerUri: !Join 
+          - ''
+          - - 'arn:'
+            - !Ref 'AWS::Partition'
+            - ':apigateway:'
+            - !Ref 'AWS::Region'
+            - ':lambda:path/2015-03-31/functions/'
+            - !Sub arn:aws:lambda:${aws:region}:${aws:accountId}:function:near-gateway-${self:provider.stage}-token-authorizer
+            - /invocations
+
+  Outputs:
+
+    NearGatewayServerlessDeploymentBucketName:
+      Value: !Ref ServerlessDeploymentBucket
+      Export:
+        Name: NearGatewayServerlessDeploymentBucketName
+
+    NearGatewayHttpApiId:
+      Description: Id of the HTTP API
+      Value: !Ref HttpApi
+      Export:
+        Name: NearGatewayHttpApiId
+    
+    NearGatewayAuthorizerId:
+      Value: !Ref NearGatewayAuthorizer
+      Export:
+        Name: NearGatewayAuthorizerId
+
+    NearGatewayHttpApiUrl:
+      Description: URL of the HTTP API
+      Value: !Join 
+        - ''
+        - - 'https://'
+          - !Ref HttpApi
+          - .execute-api.
+          - !Ref 'AWS::Region'
+          - .
+          - !Ref 'AWS::URLSuffix'
+      Export:
+        Name: NearGatewayUrl

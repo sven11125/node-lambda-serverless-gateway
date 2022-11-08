@@ -1,0 +1,92 @@
+service: wallet-service
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: ${file(../serverless-config.json):region}
+  apiGateway:
+    apiKeys:
+      - defaultKey
+  httpApi:
+    id: !ImportValue NearGatewayHttpApiId
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 'dynamodb:Query'
+        - 'dynamodb:Scan'
+        - 'dynamodb:PutItem'
+        - 'dynamodb:UpdateItem'
+        - 'dynamodb:GetItem'
+        - 'dynamodb:BatchGetItem'
+        - 'dynamodb:BatchWriteItem'
+      Resource:
+        - 'arn:aws:dynamodb:*:*:*'
+        - 'arn:aws:dynamodb:*:*:*/*/index/*'
+
+functions:
+  createWallet:
+    handler: create.main
+    events:
+     - httpApi:
+         path: /wallets
+         method: post
+  fetchWallet:
+    handler: fetch.main
+    events:
+      - httpApi:
+          path: /wallets
+          method: get
+
+plugins:
+  - serverless-offline
+  - serverless-dynamodb-local
+
+# custom:
+#  dynamodb:
+#      stages: 
+#         - dev
+#      start: 
+#         port: 8000
+#         inMemory: false
+#         migrate: true
+
+# resources: 
+#  Resources:
+#    contactTable:
+#      Type: AWS::DynamoDB::Table
+#      Properties:
+#        TableName: near-wallets
+#        AttributeDefinitions:
+#          - AttributeName: walletId
+#            AttributeType: S
+#          - AttributeName: walletName
+#            AttributeType: S
+#          - AttributeName: userId
+#            AttributeType: S
+#        KeySchema:
+#          - AttributeName: walletId
+#            KeyType: HASH
+#        ProvisionedThroughput:
+#          ReadCapacityUnits: 1
+#          WriteCapacityUnits: 1
+#        GlobalSecondaryIndexes:
+#           - IndexName: userId-Index
+#             KeySchema:
+#               - AttributeName: userId
+#                 KeyType: HASH
+#             Projection:
+#               ProjectionType: ALL
+#             ProvisionedThroughput:
+#                 ReadCapacityUnits: 1
+#                 WriteCapacityUnits: 1
+#           - IndexName: walletName-Index
+#             KeySchema:
+#               - AttributeName: walletName
+#                 KeyType: HASH
+#             Projection:
+#               ProjectionType: ALL
+#             ProvisionedThroughput:
+#               ReadCapacityUnits: 1
+#               WriteCapacityUnits: 1

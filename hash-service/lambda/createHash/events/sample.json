@@ -1,0 +1,45 @@
+{
+  "version": "2.0",
+  "routeKey": "POST /hashes",
+  "rawPath": "/hashes",
+  "rawQueryString": "",
+  "cookies": [],
+  "headers": {
+    "cache-control": "no-cache",
+    "Postman-Token": "07fcf86c-af91-45ac-a8de-ca8c1846d937",
+    "Content-Type": "text/plain",
+    "User-Agent": "PostmanRuntime/7.1.1",
+    "Accept": "*/*",
+    "Host": "localhost:3000",
+    "Authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJWMVN0R1hSOF9aNjVkSGk2Qi1teVQiLCJmaXJzdE5hbWUiOiJ0ZXN0IiwibGFzdE5hbWUiOiJ1c2VyIiwid2FsbGV0SWQiOiJ3YWZnZXNoLm5lYXIiLCJlbWFpbCI6Im1vY2stdGVzdEBwcmltZWxhYi5pbyIsInBob25lIjoiKzI1NTE4MTcxODEiLCJkb2IiOiIyMDAwLTEwLTEwIiwiaWF0IjoxNjQ1ODU2MTk4LCJleHAiOjIyNTA2NTYxOTh9.YF9PXwRBA7BSUNMs1bucg4JXZBI1e5b8KwmZi11SK3E",
+    "accept-encoding": "gzip, deflate",
+    "content-length": "130",
+    "Connection": "keep-alive"
+  },
+  "queryStringParameters": null,
+  "requestContext": {
+    "accountId": "offlineContext_accountId",
+    "apiId": "offlineContext_apiId",
+    "authorizer": {
+      "jwt": {}
+    },
+    "domainName": "offlineContext_domainName",
+    "domainPrefix": "offlineContext_domainPrefix",
+    "http": {
+      "method": "POST",
+      "path": "/hashes",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "127.0.0.1",
+      "userAgent": "PostmanRuntime/7.1.1"
+    },
+    "requestId": "offlineContext_resourceId",
+    "routeKey": "POST /hashes",
+    "stage": "$default",
+    "time": "26/Feb/2022:02:00:40 +0100",
+    "timeEpoch": 1645837240086
+  },
+  "body": "{\n\"input\": \"This is my input to hash\",\n\"algorithm\": \"sha256\"\n}",
+  "pathParameters": null,
+  "isBase64Encoded": false,
+  "stageVariables": null
+}

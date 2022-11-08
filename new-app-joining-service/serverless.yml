@@ -1,0 +1,102 @@
+service: new-app-joining-service
+frameworkVersion: "3"
+
+# plugins:
+#   - serverless-dynamodb-local
+#   - serverless-offline
+
+# custom:
+#   dynamodb:
+#     stages:
+#       - dev
+#     start:
+#       port: 8000
+#       inMemory: true
+#       heapInitial: 200m
+#       heapMax: 1g
+#       migrate: true
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: ${file(../serverless-config.json):region}
+  httpApi:
+    id: !ImportValue NearGatewayHttpApiId
+  memorySize: 512
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - dynamodb:BatchGet*
+            - dynamodb:DescribeStream
+            - dynamodb:DescribeTable
+            - dynamodb:Get*
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:BatchWrite*
+            - dynamodb:CreateTable
+            - dynamodb:Delete*
+            - dynamodb:Update*
+            - dynamodb:PutItem
+          Resource: "arn:aws:dynamodb:*:*:*"
+
+functions:
+  connect-app:
+    handler: connect.handler
+    events:
+      - httpApi:
+          path: /apps/connect
+          method: post
+
+  list-connected-app:
+    handler: list.handler
+    events:
+      - httpApi:
+          path: /apps/connected
+          method: get
+
+  remove-app:
+    handler: remove.handler
+    events:
+      - httpApi:
+          path: /apps/connected/{appId}
+          method: delete
+
+
+# resources:
+#   Resources:
+#     ConnectedAppsTable:
+#       Type: AWS::DynamoDB::Table
+#       DeletionPolicy: Retain
+#       Properties:
+#         TableName: near-connected-apps
+#         AttributeDefinitions:
+#           - AttributeName: connectionId     
+#             AttributeType: S 
+#           - AttributeName: appId     
+#             AttributeType: S       
+#         KeySchema:
+#           - AttributeName: connectionId     
+#             KeyType: HASH
+#         GlobalSecondaryIndexes:
+#           - IndexName: UserIdIndex
+#             KeySchema:
+#               - AttributeName: userId
+#                 KeyType: HASH
+#             Projection:
+#               ProjectionType: ALL
+#         BillingMode: PAY_PER_REQUEST
+#     AppsTable:
+#       Type: AWS::DynamoDB::Table
+#       DeletionPolicy: Retain
+#       Properties:
+#         TableName: near-apps
+#         AttributeDefinitions:
+#           - AttributeName: appId     
+#             AttributeType: S     
+#         KeySchema:
+#           - AttributeName: appId
+#             KeyType: HASH
+#         BillingMode: PAY_PER_REQUEST

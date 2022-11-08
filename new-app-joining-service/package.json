@@ -1,0 +1,21 @@
+{
+  "name": "new-app-joining-service",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "primelab team",
+  "license": "ISC",
+  "devDependencies": {
+    "serverless-dynamodb-local": "^0.2.40",
+    "serverless-offline": "^8.5.0"
+  },
+  "dependencies": {
+    "http-status-codes": "^2.2.0",
+    "joi": "^17.6.0",
+    "lodash": "^4.17.21",
+    "nanoid": "^3.3.1"
+  }
+}

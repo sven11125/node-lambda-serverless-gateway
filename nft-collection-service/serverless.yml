@@ -1,0 +1,214 @@
+projectDir: ../
+
+service: nft-collection-service
+frameworkVersion: "3"
+
+#plugins:
+#  - serverless-dynamodb-local
+#  - serverless-offline
+#
+#custom:
+#  dynamodb:
+#    stages:
+#      - dev
+#    start:
+#      port: 8000
+#      inMemory: true
+#      migrate: true # create tables on start
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: ${file(../serverless-config.json):region}
+  apiGateway:
+    apiKeys:
+      - defaultKey
+  environment:
+    DYNAMODB_NFTS_TABLE: 'near-nfts'
+    DYNAMODB_NFT_COLLECTIONS_TABLE: 'near-nft-collections'
+    DYNAMODB_NFT_OFFERS_TABLE: 'near-nft-offers'
+  httpApi:
+    id: !ImportValue NearGatewayHttpApiId
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 'dynamodb:Query'
+        - 'dynamodb:Scan'
+        - 'dynamodb:PutItem'
+        - 'dynamodb:UpdateItem'
+        - 'dynamodb:GetItem'
+        - 'dynamodb:BatchGetItem'
+        - 'dynamodb:BatchWriteItem'
+      Resource:
+        - 'arn:aws:dynamodb:*:*:*'
+        - 'arn:aws:dynamodb:*:*:*/*/index/*'
+functions:
+  list-nfts-collections-by-owner:
+    handler: list.handler
+    events:
+      - httpApi:
+          path: /nfts/collections/list/{ownerId}
+          method: get
+          authorizer:
+            type: request
+            id: !ImportValue NearGatewayAuthorizerId
+  create-nft-collection:
+    handler: create.handler
+    events:
+      - httpApi:
+          path: /nfts/collections
+          method: post
+          authorizer:
+            type: request
+            id: !ImportValue NearGatewayAuthorizerId
+  update-nft-collection:
+    handler: update.handler
+    events:
+      - httpApi:
+          path: /nfts/collections/{nftCollectionId}
+          method: put
+  delete-nft-collection:
+    handler: delete.handler
+    events:
+      - httpApi:
+          path: /nfts/collections/{nftCollectionId}
+          method: delete
+  get-nft-collection:
+    handler: get.handler
+    events:
+      - httpApi:
+          path: /nfts/collections/{nftCollectionId}
+          method: get
+  set-price:
+    handler: price-limit.handler
+    events:
+      - httpApi:
+          path: /nfts/set-price-limit/{nftId}
+          method: post
+          authorizer:
+            type: request
+            id: !ImportValue NearGatewayAuthorizerId
+  make-token-offer:
+    handler: make-token-offer.handler
+    events:
+      - httpApi:
+          path: /nfts/make-token-offer/{nftId}
+          method: post
+          type: request
+          id: !ImportValue NearGatewayAuthorizerId
+  make-nft-offer:
+    handler: make-nft-offer.handler
+    events:
+      - httpApi:
+          path: /nfts/make-nft-offer/{nftId}
+          method: post
+          type: request
+          id: !ImportValue NearGatewayAuthorizerId
+  list-offers-by-status:
+    handler: list-offers.handler
+    events:
+      - httpApi:
+          path: /nfts/offer/{status}/list
+          method: get
+          type: request
+          id: !ImportValue NearGatewayAuthorizerId
+  offer-accept-or-reject:
+    handler: handle-offer.handler
+    events:
+      - httpApi:
+          path: /nfts/handle/offer/{offerId}
+          method: patch
+          type: request
+          id: !ImportValue NearGatewayAuthorizerId
+  count-offer:
+    handler: counter-offer.handler
+    events:
+      - httpApi:
+          path: /nfts/count-offer/{nftId}
+          method: post
+          type: request
+          id: !ImportValue NearGatewayAuthorizerId
+  list-collection-activities:
+    handler: activities.handler
+    events:
+      - httpApi:
+          path: /nfts/collections/activities/{collectionId}
+          method: get
+          type: request
+          id: !ImportValue NearGatewayAuthorizerId
+  publish-token-offer:
+    handler: publish-token-offer.handler
+    events:
+      - httpApi:
+          path: /nfts/publish/token/offer/{nftId}
+          method: post
+          type: request
+          id: !ImportValue NearGatewayAuthorizerId
+  publish-nft-offer:
+    handler: publish-nft-offer.handler
+    events:
+      - httpApi:
+          path: /nfts/publish/nft/offer/{nftId}
+          method: post
+          type: request
+          id: !ImportValue NearGatewayAuthorizerId
+
+#resources:
+#  Resources:
+#    UsersTable:
+#      Type: AWS::DynamoDB::Table
+#      DeletionPolicy: Retain
+#      Properties:
+#        TableName: near-users
+#        AttributeDefinitions:
+#          - AttributeName: userId
+#            AttributeType: S
+#        KeySchema:
+#          - AttributeName: userId
+#            KeyType: HASH
+#        BillingMode: PAY_PER_REQUEST
+#    NftsTable:
+#      Type: AWS::DynamoDB::Table
+#      DeletionPolicy: Retain
+#      Properties:
+#        TableName: near-nfts
+#        AttributeDefinitions:
+#          - AttributeName: nftId
+#            AttributeType: S
+#        KeySchema:
+#          - AttributeName: nftId
+#            KeyType: HASH
+#        BillingMode: PAY_PER_REQUEST
+#    NftCollectionsTable:
+#      Type: AWS::DynamoDB::Table
+#      DeletionPolicy: Retain
+#      Properties:
+#        TableName: near-nft-collections
+#        AttributeDefinitions:
+#          - AttributeName: collectionId
+#            AttributeType: S
+#          - AttributeName: ownerId
+#            AttributeType: S
+#        KeySchema:
+#          - AttributeName: collectionId
+#            KeyType: HASH
+#        GlobalSecondaryIndexes:
+#          - IndexName: OwnerIdIndex
+#            KeySchema:
+#              - AttributeName: ownerId
+#                KeyType: HASH
+#            Projection:
+#              ProjectionType: ALL
+#        BillingMode: PAY_PER_REQUEST
+#    NftOffersTable:
+#      Type: AWS::DynamoDB::Table
+#      DeletionPolicy: Retain
+#      Properties:
+#        TableName: near-nft-offers
+#        AttributeDefinitions:
+#          - AttributeName: offerId
+#            AttributeType: S
+#        KeySchema:
+#          - AttributeName: offerId
+#            KeyType: HASH
+#        BillingMode: PAY_PER_REQUEST

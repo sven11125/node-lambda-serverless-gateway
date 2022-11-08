@@ -1,0 +1,24 @@
+Resources:
+  HashesTableNameParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: ${self:service} ${self:provider.stage} near-hashes Table name
+      Name: /${self:service}/dynamodb/hashes/name
+      Type: String
+      Value: !Ref HashesTable
+
+  HashesTableArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: ${self:service} ${self:provider.stage} near-hashes Table arn
+      Name: /${self:service}/dynamodb/hashes/arn
+      Type: String
+      Value: !GetAtt HashesTable.Arn
+
+  HashesTableStreamArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Description: ${self:service} ${self:provider.stage} near-hashes Table streamArn
+      Name: /${self:service}/dynamodb/hashes/streamArn
+      Type: String
+      Value: !GetAtt HashesTable.StreamArn

@@ -1,0 +1,100 @@
+service: transactionteam10-service
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  stage: dev
+  runtime: nodejs14.x
+  region: ${file(../serverless-config.json):region}
+  httpApi:
+    id: !ImportValue NearGatewayHttpApiId
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - dynamodb:BatchGet*
+            - dynamodb:DescribeStream
+            - dynamodb:DescribeTable
+            - dynamodb:Get*
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:BatchWrite*
+            - dynamodb:CreateTable
+            - dynamodb:Delete*
+            - dynamodb:Update*
+            - dynamodb:PutItem
+          Resource: "arn:aws:dynamodb:*:*:*"
+
+# #This is just for testing locally, the devops teams is deploying the DynamoTables for us
+# resources:
+#   Resources:
+#     transactionsTable:
+#       Type: AWS::DynamoDB::Table
+#       Properties:
+#         TableName: transactions
+#         AttributeDefinitions:
+#           - AttributeName: transaction_id
+#             AttributeType: S
+#         KeySchema:
+#           - AttributeName: transaction_id
+#             KeyType: HASH
+#         BillingMode: PAY_PER_REQUEST
+
+functions:
+  transactions-list:
+    handler: list.main
+    events:
+     - httpApi:
+          path: /transactions/list
+          method: get
+          authorizer:            
+            type: request
+            id: !ImportValue NearGatewayAuthorizerId
+  transactions-get:
+    handler: get.main
+    events:
+     - httpApi:
+        path: /transactions/{transactionId}
+        method: get
+        authorizer:            
+          type: request
+          id: !ImportValue NearGatewayAuthorizerId
+  transactions-get-gas:
+    handler: getGas.main
+    events:
+     - httpApi:
+        path: /transactions/{transactionId}/gasfee/{gasFee}
+        method: get
+        authorizer:            
+          type: request
+          id: !ImportValue NearGatewayAuthorizerId
+  transactions-create:
+    handler: create.main
+    events:
+     - httpApi:
+        path: /transactions
+        method: post
+        authorizer:            
+          type: request
+          id: !ImportValue NearGatewayAuthorizerId
+
+# plugins:
+#   - serverless-bundle
+#   - serverless-dotenv-plugin
+#   - serverless-offline
+#   - serverless-dynamodb-local
+
+
+# custom:
+#   dynamodb:
+#     stages:
+#       - local
+#     start:
+#       port: 8000
+#       inMemory: true
+#       heapInitial: 200m
+#       heapMax: 1g
+#       migrate: true
+#       seed: true
+#       convertEmptyValues: true

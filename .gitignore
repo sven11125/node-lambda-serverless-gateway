@@ -1,0 +1,21 @@
+# node_modules folder abd its files
+node_modules
+
+# .serverless folder and its files
+.serverless
+
+# .dynamodb folder and its files
+.dynamodb
+
+# package-lock file
+package-lock.json
+
+# Js package manager
+jspm_packages
+
+# environment files
+*.env
+
+.vscode
+.DS_Store
+.idea
